@@ -102,7 +102,24 @@
 
   document.getElementById("rslt").innerText = Average.toFixed(2);
 
-  
+
+
+	  // select পরিবর্তন হলে localStorage-এ সেভ হবে
+document.getElementById("unit").addEventListener("change", function () {
+    localStorage.setItem("unit_value", this.value);
+});
+
+// পেজ load হলে আগের সেভ করা মান আবার set হবে
+window.onload = function () {
+    let savedUnit = localStorage.getItem("unit_value");
+    if (savedUnit) {
+        document.getElementById("unit").value = savedUnit;
+    }
+};
+
+
+
+	  
    
   // GPY calculate
   
