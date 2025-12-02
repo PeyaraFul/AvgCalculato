@@ -85,79 +85,133 @@
   }
     
 </style>
-  
-  
+
+
+
+
+
+	
   <script>
-  function avg() {
-  let Number1 = Number(document.getElementById("nmbr1").value);
-  let Number2 = Number(document.getElementById("nmbr2").value);
-  let Number3 = Number(document.getElementById("nmbr3").value);
-  let Number4 = Number(document.getElementById("nmbr4").value);
-  let Number5 = Number(document.getElementById("nmbr5").value);
-  
-  let numbers = [Number1, Number2, Number3, Number4, Number5];
 
-  let sum = numbers.reduce((a, b) => a + b, 0);
-  let Average = sum / numbers.length;
-
-  document.getElementById("rslt").innerText = Average.toFixed(2);
-
-
-
-	  // select পরিবর্তন হলে localStorage-এ সেভ হবে
-document.getElementById("unit").addEventListener("change", function () {
-    localStorage.setItem("unit_value", this.value);
-});
-
-// পেজ load হলে আগের সেভ করা মান আবার set হবে
+// ------------------------------
+// Restore Cached Data on Load
+// ------------------------------
 window.onload = function () {
+
+    // Restore unit
     let savedUnit = localStorage.getItem("unit_value");
     if (savedUnit) {
         document.getElementById("unit").value = savedUnit;
     }
+
+    // Restore input numbers
+    for (let i = 1; i <= 5; i++) {
+        let val = localStorage.getItem("nmbr" + i);
+        if (val !== null) {
+            document.getElementById("nmbr" + i).value = val;
+        }
+    }
+
+    // Restore previous results if needed
+    let savedAvg = localStorage.getItem("rslt");
+    let savedGpy = localStorage.getItem("gpy");
+    let savedCv = localStorage.getItem("cv");
+
+    if (savedAvg) document.getElementById("rslt").innerText = savedAvg;
+    if (savedGpy) document.getElementById("gpy").innerText = savedGpy;
+    if (savedCv) document.getElementById("cv").innerText = savedCv;
 };
 
+// ------------------------------
+// Save Unit when Changed
+// ------------------------------
+document.getElementById("unit").addEventListener("change", function () {
+    localStorage.setItem("unit_value", this.value);
+});
+
+// ------------------------------
+// Save Input Values Automatically
+// ------------------------------
+for (let i = 1; i <= 5; i++) {
+    document.getElementById("nmbr" + i).addEventListener("input", function () {
+        localStorage.setItem("nmbr" + i, this.value);
+    });
+}
 
 
-	  
-   
-  // GPY calculate
+// ------------------------------
+// Average Calculation
+// ------------------------------
+function avg() {
+    let Number1 = Number(document.getElementById("nmbr1").value);
+    let Number2 = Number(document.getElementById("nmbr2").value);
+    let Number3 = Number(document.getElementById("nmbr3").value);
+    let Number4 = Number(document.getElementById("nmbr4").value);
+    let Number5 = Number(document.getElementById("nmbr5").value);
+
+    let numbers = [Number1, Number2, Number3, Number4, Number5];
+
+    let sum = numbers.reduce((a, b) => a + b, 0);
+    let Average = sum / numbers.length;
+
+    document.getElementById("rslt").innerText = Average.toFixed(2);
+    localStorage.setItem("rslt", Average.toFixed(2)); // cache save
+
+
+    // GPY Calculation
+    let value = document.getElementById("unit").value;
+
+    if (value === "grain") {
+        let Gpy = Average / 6;
+        document.getElementById("gpy").innerText = Gpy.toFixed(2);
+        localStorage.setItem("gpy", Gpy.toFixed(2));
+    } else {
+        let Gpy = Average * 2.5720666667;
+        document.getElementById("gpy").innerText = Gpy.toFixed(2);
+        localStorage.setItem("gpy", Gpy.toFixed(2));
+    }
+
+    // Standard Deviation
+    let squareDiffs = numbers.map(n => Math.pow(n - Average, 2));
+    let variance = squareDiffs.reduce((a, b) => a + b, 0) / numbers.length;
+    let stdDev = Math.sqrt(variance);
+
+    // CV%
+    let cv = (stdDev / Average) * 100;
+
+    document.getElementById("cv").innerText = cv.toFixed(2) + "%";
+    localStorage.setItem("cv", cv.toFixed(2) + "%");
+}
+
+
+// ------------------------------
+// RESET FUNCTION
+// ------------------------------
+function allreset() {
+
+    // clear inputs
+    for (let i = 1; i <= 5; i++) {
+        document.getElementById("nmbr" + i).value = "";
+        localStorage.removeItem("nmbr" + i);
+    }
+
+    // clear outputs
+    document.getElementById("rslt").innerText = "";
+    document.getElementById("gpy").innerText = "";
+    document.getElementById("cv").innerText = "";
+
+    localStorage.removeItem("rslt");
+    localStorage.removeItem("gpy");
+    localStorage.removeItem("cv");
+}
+
+</script>
   
-  let value = document.getElementById("unit").value;
 
-if (value === "grain") {
-  let Gpy = Average / 6;
-  document.getElementById("gpy").innerText = Gpy.toFixed(2);
-} 
-else {
-  let Gpy = Average * 2.5720666667;
-  document.getElementById("gpy").innerText = Gpy.toFixed(2);
-}
 
-   
 
-  // Standard Deviation হিসাব
-  let squareDiffs = numbers.map(n => Math.pow(n - Average, 2));
-  let variance = squareDiffs.reduce((a, b) => a + b, 0) / numbers.length;
-  let stdDev = Math.sqrt(variance);
 
-  // CV% হিসাব
-  let cv = (stdDev / Average) * 100;
-
-  document.getElementById("cv").innerText = cv.toFixed(2) + "%";
-}
-    
-  function allreset() {
-  document.getElementById("nmbr1").value = '';
-  document.getElementById("nmbr2").value = '';
-  document.getElementById("nmbr3").value = '';
-  document.getElementById("nmbr4").value = '';
-  document.getElementById("nmbr5").value = '';
-  document.getElementById("rslt").innerText = '';
-}  
-    
-    
-  </script>
+	
   </head>
  
 <body>
